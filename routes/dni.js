@@ -5,7 +5,7 @@ const multer = require('multer');
 //UPLOAD IMAGE
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'images/');
+        cb(null, '../images/');
     },
     filename: (req, file, cb) => {
         cb(null, 'identification.jpg');
