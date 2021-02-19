@@ -1,12 +1,15 @@
 const tesseract = require('node-tesseract-ocr');
 const parse = require('mrz').parse;
 const Jimp = require('jimp');
+const path = require('path');
 
+//PATH IMAGE
+const imagePath = path.join(__dirname, '../images/');
 class DniService {
     constructor() {}
     async getData({ type }) {
         await this.greyConvert();
-        let TextFromTesseract = await this.recognizeImage('../images/identificationG.jpg');
+        let TextFromTesseract = await this.recognizeImage(`${imagePath}/identificationG.jpg`);
         let longitudArray = [],
             message = [],
             data = [];
@@ -59,13 +62,13 @@ class DniService {
     }
     greyConvert() {
         return new Promise((resolve, reject) => {
-            Jimp.read('images/identification.jpg', (err, image) => {
+            Jimp.read(`${imagePath}/identification.jpg`, (err, image) => {
                 if (err) {
                     reject(err);
                 }
                 image.brightness(-0.2);
                 image.contrast(0.3);
-                image.greyscale().write('images/identificationG.jpg');
+                image.greyscale().write(`${imagePath}/identificationG.jpg`);
                 resolve();
             });
         });
