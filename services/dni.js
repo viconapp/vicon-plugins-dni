@@ -10,6 +10,7 @@ class DniService {
     async getData({ type }) {
         await this.greyConvert();
         let TextFromTesseract = await this.recognizeImage(`${imagePath}identificationG.jpg`);
+        console.log(TextFromTesseract);
         let longitudArray = [],
             message = [],
             data = [];
