@@ -8,8 +8,8 @@ const imagePath = path.join(__dirname, '../images/');
 class DniService {
     constructor() {}
     async getData({ type }) {
-        await this.greyConvert();
-        let TextFromTesseract = await this.recognizeImage(`${imagePath}identificationG.jpg`);
+        await this.preprocessImage();
+        let TextFromTesseract = await this.recognizeImage(`${imagePath}/identificationG.jpg`);
         console.log(TextFromTesseract);
         let longitudArray = [],
             message = [],
@@ -44,35 +44,38 @@ class DniService {
             default:
                 break;
         }
+
         let userData = parse(longitudArray);
+        userData.fields.firstName = userData.fields.firstName.split(' ')[0];
         return userData.fields;
     }
-    recognizeImage(image) {
+    async recognizeImage(image) {
         const config = {
             lang: 'eng',
             oem: 1,
             psm: 3,
+            tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\\<0123456789',
         };
         try {
-            const data = tesseract.recognize(image, config);
+            let data = await tesseract.recognize(image, config);
             return data;
         } catch (error) {
             // eslint-disable-next-line no-console
+            console.error('Error recognizing image:', error);
             return error;
         }
     }
-    greyConvert() {
-        return new Promise((resolve, reject) => {
-            Jimp.read(`${imagePath}/identification.jpg`, (err, image) => {
-                if (err) {
-                    reject(err);
-                }
-                image.brightness(-0.2);
-                image.contrast(0.3);
-                image.greyscale().write(`${imagePath}/identificationG.jpg`);
-                resolve();
-            });
-        });
+    async preprocessImage() {
+        const image = await Jimp.read(`${imagePath}identification.jpg`);
+        image
+            .resize(Jimp.AUTO, 1000)
+            .contrast(0.5)
+            .brightness(0.2)
+            .normalize()
+            .gaussian(1)
+            .greyscale()
+            .invert()
+            .write(`${imagePath}identificationG.jpg`);
     }
 }
 
